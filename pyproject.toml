@@ -14,4 +14,7 @@ dependencies = [
     "python-decouple>=3.8",
     "pillow>=11.0.0",
     "django-filter>=24.3",
+    "django-rest-swagger>=2.2.0",
+    "setuptools>=75.0.0",
+    "drf-yasg>=1.21.8",
 ]
