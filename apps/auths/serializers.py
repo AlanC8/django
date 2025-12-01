@@ -1,38 +1,15 @@
 from typing import Any, Optional
 
 from rest_framework.exceptions import ValidationError
-from rest_framework.serializers import (
-    CharField,
-    EmailField,
-    IntegerField,
-    ListField,
-    Serializer,
-)
+from rest_framework.serializers import (CharField, EmailField, ListField,
+                                        Serializer)
 
 from .models import User
 
 
-class UserLoginResponseSerializer(Serializer):
-    """Serializer for user login response."""
-
-    id = IntegerField()
-    email = EmailField()
-    access_token = CharField()
-    refresh_token = CharField()
-
-    class Meta:
-        model = User
-        fields = [
-            "id",
-            "email",
-            "access_token",
-            "refresh_token",
-        ]
-
-
-class UserLoginErrorsSerializer(Serializer):
+class AuthErrorsSerializer(Serializer):
     """
-    Serializer for user login errors.
+    Serializer for user registration errors.
     """
 
     email = ListField(
@@ -66,9 +43,9 @@ class HTTP405MethodNotAllowedSerializer(Serializer):
         fields = ("detail",)
 
 
-class UserLoginSerializer(Serializer):
+class UserRegisterSerializer(Serializer):
     """
-    Serializer for user login.
+    Serializer for user registration.
     """
 
     email = EmailField(
@@ -90,23 +67,11 @@ class UserLoginSerializer(Serializer):
 
     def validate_email(self, value: str) -> str:
         """Validates the email field."""
-        return value.lower()
+        email: str = value.lower()
 
-    def validate(self, attrs: dict[str, Any]) -> dict[str, Any]:
-        """Validates the input data."""
-        email: str = attrs["email"]
-        password: str = attrs["password"]
-
-        user: Optional[User] = User.objects.filter(email=email).first()
-
-        if not user:
+        if User.objects.filter(email=email).exists():
             raise ValidationError(
-                detail={"email": [f"User with email '{email}' does not exist."]}
+                detail={"email": [f"User with email '{email}' already exists."]}
             )
 
-        if not user.check_password(raw_password=password):
-            raise ValidationError(detail={"password": ["Incorrect password."]})
-
-        attrs["user"] = user
-
-        return super().validate(attrs)
+        return email
