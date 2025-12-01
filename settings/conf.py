@@ -9,6 +9,6 @@ ENV_POSSIBLE_OPTIONS = [
 ]
 
 ENV_ID = config(
-    "DJANGORLAR_ENV_ID",
+    "PROJECT_ENV_ID",
     cast=str,
 )

@@ -25,11 +25,7 @@ DJANGO_AND_THIRD_PARTY_APPS = [
     "django.contrib.staticfiles",
 ]
 
-PROJECT_APPS = [
-    "apps.welcome",
-    "apps.users",
-    "apps.city_time",
-]
+PROJECT_APPS = []
 INSTALLED_APPS = PROJECT_APPS + DJANGO_AND_THIRD_PARTY_APPS
 
 
@@ -86,4 +82,3 @@ USE_TZ = True
 
 
 SECRET_KEY = "django-insecure-bqt7^m_m908t-xnc6!gh(bn&indw#)9sr!@3m&(#yn*_-sz03c"
-
