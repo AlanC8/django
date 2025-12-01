@@ -18,6 +18,9 @@ AUTH_USER_MODEL = "auths.User"
 # Apps
 #
 DJANGO_AND_THIRD_PARTY_APPS = [
+    "unfold",
+    "unfold.contrib.filters",
+    "unfold.contrib.forms",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -30,7 +33,17 @@ PROJECT_APPS = [
     "apps.abstracts",
     "apps.auths",
 ]
-INSTALLED_APPS = PROJECT_APPS + DJANGO_AND_THIRD_PARTY_APPS
+INSTALLED_APPS = DJANGO_AND_THIRD_PARTY_APPS + PROJECT_APPS
+
+
+# ----------------------------------------------------------------
+# Unfold Settings
+#
+UNFOLD = {
+    "SITE_TITLE": "Django Admin",
+    "SITE_HEADER": "Django Admin",
+    "SITE_SYMBOL": "speed",
+}
 
 
 # ----------------------------------------------------------------
