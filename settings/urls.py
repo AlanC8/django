@@ -23,4 +23,5 @@ urlpatterns = [
 
     path("api/apartments/", include("apps.listings.urls")),
     path("api/locations/", include("apps.locations.urls")),
+    path("api/", include("apps.auths.urls")),
 ]
