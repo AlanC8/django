@@ -30,6 +30,8 @@ DJANGO_AND_THIRD_PARTY_APPS = [
 
     "rest_framework",
     "django_filters",
+    "drf_yasg",
+    
 ]
 
 PROJECT_APPS = [
@@ -50,7 +52,6 @@ REST_FRAMEWORK = {
         "rest_framework.filters.OrderingFilter",
     ]
 }
-
 
 # ----------------------------------------------------------------
 # Unfold Settings
