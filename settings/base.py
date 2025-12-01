@@ -100,4 +100,3 @@ USE_I18N = True
 USE_TZ = True
 
 
-SECRET_KEY = "django-insecure-bqt7^m_m908t-xnc6!gh(bn&indw#)9sr!@3m&(#yn*_-sz03c"
