@@ -6,7 +6,7 @@ from apps.auths.models import User
 
 
 @admin.register(User)
-class UserAdmin(BaseUserAdmin, ModelAdmin):
+class UserAdmin(BaseUserAdmin, ModelAdmin):  # type: ignore
     """Admin configuration for User model with Unfold styling."""
 
     list_display = ("email", "is_staff", "is_active", "created_at")
@@ -18,7 +18,15 @@ class UserAdmin(BaseUserAdmin, ModelAdmin):
         (None, {"fields": ("email", "password")}),
         (
             "Permissions",
-            {"fields": ("is_active", "is_staff", "is_superuser", "groups", "user_permissions")},
+            {
+                "fields": (
+                    "is_active",
+                    "is_staff",
+                    "is_superuser",
+                    "groups",
+                    "user_permissions",
+                )
+            },
         ),
         ("Important dates", {"fields": ("last_login",)}),
     )
