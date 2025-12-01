@@ -1,0 +1,50 @@
+# Python cache files
+__pycache__/
+*.py[cod]
+*.pyo
+
+# Virtual environment
+venv/
+.venv/
+
+# Docker-related files
+Dockerfile
+docker-compose.yml
+
+# Logs and temporary files
+*.log
+*.tmp
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+
+# Formatting and linting
+.mypy_cache/
+.pytest_cache/
+.pyre/
+ruff_cache/
+
+# Test and coverage reports
+htmlcov/
+*.cover
+*.py,cover
+.cache
+nosetests.xml
+coverage.xml
+*.coveragerc
+
+# Static and media files (if generated dynamically)
+staticfiles/
+mediafiles/
+
+# Build artifacts
+build/
+dist/
+*.egg-info/
+
+# Database files
+*.sqlite3
+db.sqlite3
+
