@@ -23,7 +23,7 @@ class PhotoViewSet(viewsets.ModelViewSet):
 
     queryset = Photo.objects.all().select_related("listing")
     serializer_class = PhotoSerializer
-    permission_classes = (permissions.AllowAny,)
+    permission_classes = (permissions.IsAuthenticated,)
 
     filterset_fields = [
         "listing",

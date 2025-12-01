@@ -1,18 +1,17 @@
 from rest_framework import serializers
 from apps.listings.models import Property
-from apps.locations.serializers.cities import CitySerializer
 
 
 class PropertySerializer(serializers.ModelSerializer):
-    city = CitySerializer(read_only=True)
+    city = serializers.CharField()
 
     class Meta:
         model = Property
         fields = [
             "id",
-            "title",
             "property_type",
             "city",
+            "address",
             "rooms",
             "total_area",
             "living_area",

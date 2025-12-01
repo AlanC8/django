@@ -20,9 +20,10 @@ class PropertyViewSet(viewsets.ModelViewSet):
     With filtering, searching and sorting.
     """
 
-    queryset = Property.objects.all().select_related("city")
+    # city is a CharField, so no select_related
+    queryset = Property.objects.all()
     serializer_class = PropertySerializer
-    permission_classes = (permissions.AllowAny,)
+    permission_classes = (permissions.IsAuthenticated,)
 
     filterset_fields = [
         "property_type",

@@ -20,6 +20,10 @@ listing_my = ListingViewSet.as_view({
     "get": "my_listings",
 })
 
+listing_published = ListingViewSet.as_view({
+    "get": "published_listings",
+})
+
 listing_publish = ListingViewSet.as_view({
     "post": "publish",
 })
@@ -52,6 +56,7 @@ urlpatterns = [
     path("listings/", listing_list),
     path("listings/<int:pk>/", listing_detail),
     path("listings/my/", listing_my),
+    path("listings/published/", listing_published),
     path("listings/<int:pk>/publish/", listing_publish),
 
     # Properties
