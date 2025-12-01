@@ -1,5 +1,7 @@
 from typing import Any
 
+from drf_yasg import openapi
+from drf_yasg.utils import swagger_auto_schema
 from rest_framework.decorators import action
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.request import Request as DRFRequest
@@ -9,7 +11,11 @@ from rest_framework.viewsets import ViewSet
 from rest_framework_simplejwt.tokens import RefreshToken
 
 from apps.auths.models import User
-from apps.auths.serializers import UserRegisterSerializer
+from apps.auths.serializers import (
+    AuthErrorsSerializer,
+    HTTP405MethodNotAllowedSerializer,
+    UserRegisterSerializer,
+)
 
 
 class UserViewSet(ViewSet):
@@ -17,6 +23,32 @@ class UserViewSet(ViewSet):
     ViewSet for handling CustomUser-related endpoints.
     """
 
+    @swagger_auto_schema(
+        operation_description="Fetch personal account details of the authenticated user.",
+        operation_summary="Get current user info",
+        tags=["Auth"],
+        responses={
+            200: openapi.Response(
+                description="User information retrieved successfully",
+                schema=openapi.Schema(
+                    type=openapi.TYPE_OBJECT,
+                    properties={
+                        "id": openapi.Schema(
+                            type=openapi.TYPE_INTEGER, description="User ID"
+                        ),
+                        "email": openapi.Schema(
+                            type=openapi.TYPE_STRING, description="User email"
+                        ),
+                    },
+                ),
+            ),
+            401: openapi.Response(
+                description="Authentication credentials were not provided"
+            ),
+            405: HTTP405MethodNotAllowedSerializer,
+        },
+        security=[{"Bearer": []}],
+    )
     @action(
         methods=("GET",),
         detail=False,
@@ -27,22 +59,7 @@ class UserViewSet(ViewSet):
     def get_user_info(
         self, request: DRFRequest, *args: tuple[Any, ...], **kwargs: dict[str, Any]
     ) -> DRFResponse:
-        """
-        Fetch personal account details of the authenticated user.
-
-        Parameters:
-            request: DRFRequest
-                The request object.
-            *args: tuple
-                Additional positional arguments.
-            **kwargs: dict
-                Additional keyword arguments.
-
-        Returns:
-            DRFResponse
-                Response containing user data.
-        """
-
+        """Fetch personal account details of the authenticated user."""
         user: User = request.user
 
         return DRFResponse(
@@ -53,6 +70,36 @@ class UserViewSet(ViewSet):
             status=HTTP_200_OK,
         )
 
+    @swagger_auto_schema(
+        operation_description="Register a new user and return JWT tokens.",
+        operation_summary="Register new user",
+        tags=["Auth"],
+        request_body=UserRegisterSerializer,
+        responses={
+            200: openapi.Response(
+                description="User registered successfully",
+                schema=openapi.Schema(
+                    type=openapi.TYPE_OBJECT,
+                    properties={
+                        "id": openapi.Schema(
+                            type=openapi.TYPE_INTEGER, description="User ID"
+                        ),
+                        "email": openapi.Schema(
+                            type=openapi.TYPE_STRING, description="User email"
+                        ),
+                        "access": openapi.Schema(
+                            type=openapi.TYPE_STRING, description="JWT access token"
+                        ),
+                        "refresh": openapi.Schema(
+                            type=openapi.TYPE_STRING, description="JWT refresh token"
+                        ),
+                    },
+                ),
+            ),
+            400: AuthErrorsSerializer,
+            405: HTTP405MethodNotAllowedSerializer,
+        },
+    )
     @action(
         methods=("POST",),
         detail=False,
@@ -63,22 +110,7 @@ class UserViewSet(ViewSet):
     def register(
         self, request: DRFRequest, *args: tuple[Any, ...], **kwargs: dict[str, Any]
     ) -> DRFResponse:
-        """
-        Handle user registration.
-
-        Parameters:
-            request: DRFRequest
-                The request object.
-            *args: tuple
-                Additional positional arguments.
-            **kwargs: dict
-                Additional keyword arguments.
-
-        Returns:
-            DRFResponse
-                Response containing user data or error message.
-        """
-
+        """Register a new user and return JWT tokens."""
         serializer: UserRegisterSerializer = UserRegisterSerializer(data=request.data)  # type: ignore
         serializer.is_valid(raise_exception=True)
 
