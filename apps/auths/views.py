@@ -1,19 +1,21 @@
 from typing import Any
 
-from rest_framework import viewsets
 from rest_framework.decorators import action
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.request import Request as DRFRequest
 from rest_framework.response import Response as DRFResponse
 from rest_framework.status import HTTP_200_OK
+from rest_framework.viewsets import ViewSet
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from .models import User
-from .serializers import UserSerializer
+from apps.auths.models import User
+from apps.auths.serializers import UserLoginSerializer
 
 
-class UserViewSet(viewsets.ModelViewSet):
-    """ViewSet for managing User instances."""
+class UserViewSet(ViewSet):
+    """
+    ViewSet for handling CustomUser-related endpoints.
+    """
 
     @action(
         methods=("POST",),
@@ -22,7 +24,9 @@ class UserViewSet(viewsets.ModelViewSet):
         url_name="login",
         permission_classes=(AllowAny,),
     )
-    def login(self, request: DRFRequest, *args: Any, **kwargs: Any) -> DRFResponse:
+    def login(
+        self, request: DRFRequest, *args: tuple[Any, ...], **kwargs: dict[str, Any]
+    ) -> DRFResponse:
         """
         Handle user login.
 
@@ -39,7 +43,7 @@ class UserViewSet(viewsets.ModelViewSet):
                 Response containing user data or error message.
         """
 
-        serializer: UserSerializer = UserSerializer(data=request.data)  # type: ignore
+        serializer: UserLoginSerializer = UserLoginSerializer(data=request.data)  # type: ignore
 
         serializer.is_valid(raise_exception=True)
 
@@ -50,8 +54,47 @@ class UserViewSet(viewsets.ModelViewSet):
 
         return DRFResponse(
             data={
+                "id": user.id,  # type: ignore
+                "email": user.email,
                 "access": access_token,
                 "refresh": str(refresh),
             },
             status=HTTP_200_OK,
         )
+
+    @action(
+        methods=("GET",),
+        detail=False,
+        url_name="personal_account",
+        url_path="personal_account",
+        permission_classes=(IsAuthenticated,),
+    )
+    def fetch_personal_account(
+        self, request: DRFRequest, *args: tuple[Any, ...], **kwargs: dict[str, Any]
+    ) -> DRFResponse:
+        """
+        Fetch personal account details of the authenticated user.
+
+        Parameters:
+            request: DRFRequest
+                The request object.
+            *args: tuple
+                Additional positional arguments.
+            **kwargs: dict
+                Additional keyword arguments.
+
+        Returns:
+            DRFResponse
+                Response containing user data.
+        """
+
+        user: User = request.user
+
+        return DRFResponse(
+            data={
+                "id": user.id,  # type: ignore
+                "email": user.email,
+            },
+            status=HTTP_200_OK,
+        )
+
