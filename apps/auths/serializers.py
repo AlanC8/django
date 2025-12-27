@@ -152,3 +152,20 @@ class UserSuccessAuthSerializer(Serializer):
             "access",
             "refresh",
         )
+
+
+class UserInfoSerializer(Serializer):
+    """
+    Serializer for user information.
+    """
+
+    id = CharField()
+    email = EmailField()
+
+    class Meta:
+        """Customization of the Serializer metadata."""
+
+        fields = (
+            "id",
+            "email",
+        )

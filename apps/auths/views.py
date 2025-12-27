@@ -1,7 +1,6 @@
 from typing import Any
 
-from drf_spectacular.utils import OpenApiResponse, extend_schema, inline_serializer
-from rest_framework import serializers
+from drf_spectacular.utils import OpenApiResponse, extend_schema
 from rest_framework.decorators import action
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.request import Request as DRFRequest
@@ -14,8 +13,10 @@ from apps.auths.models import User
 from apps.auths.serializers import (
     AuthErrorsSerializer,
     HTTP405MethodNotAllowedSerializer,
+    UserInfoSerializer,
     UserLoginSerializer,
     UserRegisterSerializer,
+    UserSuccessAuthSerializer,
 )
 
 
@@ -29,13 +30,7 @@ class UserViewSet(ViewSet):
         summary="Get current user info",
         description="Fetch personal account details of the authenticated user.",
         responses={
-            200: inline_serializer(
-                name="UserInfoResponse",
-                fields={
-                    "id": serializers.IntegerField(),
-                    "email": serializers.EmailField(),
-                },
-            ),
+            200: UserInfoSerializer,
             401: OpenApiResponse(
                 description="Authentication credentials were not provided"
             ),
@@ -70,15 +65,7 @@ class UserViewSet(ViewSet):
         description="Register a new user and return JWT tokens.",
         request=UserRegisterSerializer,
         responses={
-            200: inline_serializer(
-                name="UserRegisterResponse",
-                fields={
-                    "id": serializers.IntegerField(),
-                    "email": serializers.EmailField(),
-                    "access": serializers.CharField(),
-                    "refresh": serializers.CharField(),
-                },
-            ),
+            200: UserSuccessAuthSerializer,
             400: AuthErrorsSerializer,
             405: HTTP405MethodNotAllowedSerializer,
         },
@@ -102,7 +89,6 @@ class UserViewSet(ViewSet):
             password=serializer.validated_data["password"],  # type: ignore
         )
 
-
         refresh: RefreshToken = RefreshToken.for_user(user)
         access_token: str = str(refresh.access_token)
 
@@ -116,8 +102,19 @@ class UserViewSet(ViewSet):
             status=HTTP_200_OK,
         )
 
+    @extend_schema(
+        tags=["Auth"],
+        summary="User login",
+        description="Authenticate user and return JWT tokens.",
+        request=UserLoginSerializer,
+        responses={
+            200: UserSuccessAuthSerializer,
+            401: AuthErrorsSerializer,
+            405: HTTP405MethodNotAllowedSerializer,
+        },
+    )
     @action(
-        methods=("POST,"),
+        methods=("POST",),
         detail=False,
         url_name="login",
         url_path="login",
