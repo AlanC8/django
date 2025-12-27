@@ -1,7 +1,6 @@
 from typing import Any
 
-from drf_spectacular.utils import OpenApiResponse, extend_schema, inline_serializer
-from rest_framework import serializers
+from drf_spectacular.utils import OpenApiResponse, extend_schema
 from rest_framework.decorators import action
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.request import Request as DRFRequest
@@ -14,7 +13,10 @@ from apps.auths.models import User
 from apps.auths.serializers import (
     AuthErrorsSerializer,
     HTTP405MethodNotAllowedSerializer,
+    UserInfoSerializer,
+    UserLoginSerializer,
     UserRegisterSerializer,
+    UserSuccessAuthSerializer,
 )
 
 
@@ -28,19 +30,13 @@ class UserViewSet(ViewSet):
         summary="Get current user info",
         description="Fetch personal account details of the authenticated user.",
         responses={
-            200: inline_serializer(
-                name="UserInfoResponse",
-                fields={
-                    "id": serializers.IntegerField(),
-                    "email": serializers.EmailField(),
-                },
-            ),
+            200: UserInfoSerializer,
             401: OpenApiResponse(
                 description="Authentication credentials were not provided"
             ),
             405: HTTP405MethodNotAllowedSerializer,
         },
-        auth=[{"Bearer": []}],
+        auth=[{"Bearer": []}],  # type: ignore
     )
     @action(
         methods=("GET",),
@@ -69,15 +65,7 @@ class UserViewSet(ViewSet):
         description="Register a new user and return JWT tokens.",
         request=UserRegisterSerializer,
         responses={
-            200: inline_serializer(
-                name="UserRegisterResponse",
-                fields={
-                    "id": serializers.IntegerField(),
-                    "email": serializers.EmailField(),
-                    "access": serializers.CharField(),
-                    "refresh": serializers.CharField(),
-                },
-            ),
+            200: UserSuccessAuthSerializer,
             400: AuthErrorsSerializer,
             405: HTTP405MethodNotAllowedSerializer,
         },
@@ -110,6 +98,60 @@ class UserViewSet(ViewSet):
                 "email": user.email,
                 "access": access_token,
                 "refresh": str(refresh),
+            },
+            status=HTTP_200_OK,
+        )
+
+    @extend_schema(
+        tags=["Auth"],
+        summary="User login",
+        description="Authenticate user and return JWT tokens.",
+        request=UserLoginSerializer,
+        responses={
+            200: UserSuccessAuthSerializer,
+            401: AuthErrorsSerializer,
+            405: HTTP405MethodNotAllowedSerializer,
+        },
+    )
+    @action(
+        methods=("POST",),
+        detail=False,
+        url_name="login",
+        url_path="login",
+        permission_classes=(AllowAny,),
+    )
+    def login(
+        self, request: DRFRequest, *args: tuple[Any, ...], **kwargs: dict[str, Any]
+    ) -> DRFResponse:
+        """Login endpoint is handled by DecoratedTokenObtainPairView.
+
+        Parameters:
+            request: DRFRequest
+                The request object.
+            *args: tuple
+                Additional positional arguments.
+            **kwargs: dict
+                Additional keyword arguments.
+
+        Returns:
+            DRFResponse
+                Response containing user data or error message
+        """
+
+        serializer: UserLoginSerializer = UserLoginSerializer(data=request.data)  # type: ignore
+        serializer.is_valid(raise_exception=True)
+
+        user: User = serializer.validated_data.pop("user")  # type: ignore
+
+        refresh_token: RefreshToken = RefreshToken.for_user(user)
+        access_token: str = str(refresh_token.access_token)
+
+        return DRFResponse(
+            data={
+                "id": user.id,  # type: ignore
+                "email": user.email,
+                "access": access_token,
+                "refresh": str(refresh_token),
             },
             status=HTTP_200_OK,
         )
