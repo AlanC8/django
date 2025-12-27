@@ -10,6 +10,14 @@ class Property(AbstractBaseModel):
     Can have multiple listings (Listing).
     """
 
+    TITLE_MAX_LEN = 100
+    PROPERTY_TYPE_MAX_LEN = 20
+    ADDRESS_MAX_LEN = 100
+    TOTAL_MAX_DIGITS = 7
+    TOTAL_DECIMAL_PLACES = 2
+    MAP_MAX_DIGITS = 9
+    MAX_DECIMAL_PLACES = 6
+
     class PropertyType(models.TextChoices):
         APARTMENT = "apartment", "Apartment"
         HOUSE = "house", "House"
@@ -17,7 +25,7 @@ class Property(AbstractBaseModel):
         LAND = "land", "Land"
 
     title = models.CharField(
-        max_length=255,
+        max_length=TITLE_MAX_LEN,
         help_text="Short name of the property, for example: '2-bedroom apartment, Samal'",
     )
     property_type = models.CharField(
@@ -25,20 +33,21 @@ class Property(AbstractBaseModel):
         choices=PropertyType.choices,
         default=PropertyType.APARTMENT,
     )
-    city = models.CharField(max_length=100)
-    address = models.CharField(max_length=255)
+
+    city = models.CharField(max_length=TITLE_MAX_LEN)
+    address = models.CharField(max_length=ADDRESS_MAX_LEN)
 
     rooms = models.PositiveSmallIntegerField(
         help_text="Number of rooms",
     )
     total_area = models.DecimalField(
-        max_digits=7,
-        decimal_places=2,
+        max_digits=TOTAL_MAX_DIGITS,
+        decimal_places=TOTAL_DECIMAL_PLACES,
         help_text="Total area, m²",
     )
     living_area = models.DecimalField(
-        max_digits=7,
-        decimal_places=2,
+        max_digits=TOTAL_MAX_DIGITS,
+        decimal_places=TOTAL_DECIMAL_PLACES,
         null=True,
         blank=True,
         help_text="Living area, m²",
@@ -61,14 +70,14 @@ class Property(AbstractBaseModel):
     )
 
     latitude = models.DecimalField(
-        max_digits=9,
-        decimal_places=6,
+        max_digits=MAP_MAX_DIGITS,
+        decimal_places=MAX_DECIMAL_PLACES,
         null=True,
         blank=True,
     )
     longitude = models.DecimalField(
-        max_digits=9,
-        decimal_places=6,
+        max_digits=MAP_MAX_DIGITS,
+        decimal_places=MAX_DECIMAL_PLACES,
         null=True,
         blank=True,
     )
@@ -84,6 +93,12 @@ class Listing(AbstractBaseModel):
     Listing on the website (like on krisha.kz).
     Linked to Property and user.
     """
+
+    TITLE_MAX_LEN = 100
+    PRICE_MAX_DIGITS = 12
+    PRICE_DECIMAL_PLACES = 2
+    CURRENCY_MAX_LEN = 3
+    STATUS_MAX_LEN = 20
 
     class Status(models.TextChoices):
         DRAFT = "draft", "Draft"
@@ -101,20 +116,20 @@ class Listing(AbstractBaseModel):
         related_name="listings",
     )
 
-    title = models.CharField(max_length=255)
+    title = models.CharField(max_length=TITLE_MAX_LEN)
     description = models.TextField(blank=True)
 
     price = models.DecimalField(
-        max_digits=12,
-        decimal_places=2,
+        max_digits=PRICE_MAX_DIGITS,
+        decimal_places=PRICE_DECIMAL_PLACES,
     )
     currency = models.CharField(
-        max_length=3,
-        default="KZT",  # можешь поменять на choices
+        max_length=CURRENCY_MAX_LEN,
+        default="KZT",  
     )
 
     status = models.CharField(
-        max_length=20,
+        max_length=STATUS_MAX_LEN,
         choices=Status.choices,
         default=Status.DRAFT,
     )
@@ -144,6 +159,8 @@ class Photo(AbstractBaseModel):
     Photo, linked to the listing.
     """
 
+    ORDER_DEFAULT = 0
+
     listing = models.ForeignKey(
         Listing,
         on_delete=models.CASCADE,
@@ -157,7 +174,7 @@ class Photo(AbstractBaseModel):
         help_text="Main photo",
     )
     order = models.PositiveIntegerField(
-        default=0,
+        default=ORDER_DEFAULT,
         help_text="Order of sorting",
     )
 
