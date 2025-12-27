@@ -4,16 +4,17 @@ from typing import Dict, Union
 # Django modules
 from django.conf import settings
 from django.db.models import (
-    CharField,
-    DecimalField,
-    PositiveSmallIntegerField,
-    PositiveIntegerField,
-    BooleanField,
-    TextField,
-    ForeignKey,
-    DateTimeField,
-    ImageField,
     CASCADE,
+    BooleanField,
+    CharField,
+    DateTimeField,
+    DecimalField,
+    ForeignKey,
+    ImageField,
+    PositiveIntegerField,
+    PositiveSmallIntegerField,
+    TextField,
+    TextChoices,
 )
 
 # Project modules
@@ -34,18 +35,11 @@ class Property(AbstractBaseModel):
     MAP_MAX_DIGITS = 9
     MAX_DECIMAL_PLACES = 6
 
-    # Style: Constants for choices instead of TextChoices
-    TYPE_APARTMENT = "apartment"
-    TYPE_HOUSE = "house"
-    TYPE_COMMERCIAL = "commercial"
-    TYPE_LAND = "land"
-    
-    PROPERTY_TYPE_CHOICES = {
-        TYPE_APARTMENT: "Apartment",
-        TYPE_HOUSE: "House",
-        TYPE_COMMERCIAL: "Commercial",
-        TYPE_LAND: "Land",
-    }
+    class PropertyType(TextChoices):
+        APARTMENT = "apartment", "Apartment"
+        HOUSE = "house", "House"
+        COMMERCIAL = "commercial", "Commercial"
+        LAND = "land", "Land"
 
     title = CharField(
         max_length=TITLE_MAX_LEN,
@@ -53,8 +47,8 @@ class Property(AbstractBaseModel):
     )
     property_type = CharField(
         max_length=PROPERTY_TYPE_MAX_LEN,
-        choices=PROPERTY_TYPE_CHOICES,
-        default=TYPE_APARTMENT,
+        choices=PropertyType.choices,
+        default=PropertyType.APARTMENT,
     )
     city = CharField(
         max_length=TITLE_MAX_LEN,
@@ -129,15 +123,10 @@ class Listing(AbstractBaseModel):
     CURRENCY_MAX_LEN = 3
     STATUS_MAX_LEN = 20
 
-    STATUS_DRAFT = "draft"
-    STATUS_PUBLISHED = "published"
-    STATUS_ARCHIVED = "archived"
-
-    STATUS_CHOICES = {
-        STATUS_DRAFT: "Draft",
-        STATUS_PUBLISHED: "Published",
-        STATUS_ARCHIVED: "Archived",
-    }
+    class Status(TextChoices):
+        DRAFT = "draft", "Draft"
+        PUBLISHED = "published", "Published"
+        ARCHIVED = "archived", "Archived"
 
     property = ForeignKey(
         to=Property,
@@ -165,8 +154,8 @@ class Listing(AbstractBaseModel):
     )
     status = CharField(
         max_length=STATUS_MAX_LEN,
-        choices=STATUS_CHOICES,
-        default=STATUS_DRAFT,
+        choices=Status.choices,
+        default=Status.DRAFT,
     )
     is_top = BooleanField(
         default=False,
@@ -182,7 +171,7 @@ class Listing(AbstractBaseModel):
         Get the human-readable status label.
         Manual implementation since we use dict for choices (optional but safer).
         """
-        return self.STATUS_CHOICES.get(self.status, str(self.status))
+        return self.Status(self.status).label if self.status in self.Status.values else str(self.status)
 
     def __repr__(self) -> str:
         """Returns the official string representation of the object."""
