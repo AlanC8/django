@@ -1,5 +1,3 @@
-from typing import Any, Optional
-
 from rest_framework.exceptions import ValidationError
 from rest_framework.serializers import (CharField, EmailField, ListField,
                                         Serializer)
