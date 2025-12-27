@@ -58,8 +58,8 @@ class ListingViewSet(ViewSet):
             "property", "owner").order_by("-published_at")
 
         status_param = request.query_params.get("status")
-        if status_param == "published":
-            queryset = queryset.filter(status=Listing.STATUS_PUBLISHED)
+        if status_param == Listing.Status.PUBLISHED:
+            queryset = queryset.filter(status=Listing.Status.PUBLISHED)
 
         serializer: ListingListSerializer = ListingListSerializer(
             queryset,
@@ -222,7 +222,7 @@ class ListingViewSet(ViewSet):
         if listing.owner != request.user:
             return DRFResponse(status=HTTP_403_FORBIDDEN)
 
-        listing.status = Listing.STATUS_PUBLISHED
+        listing.status = Listing.Status.PUBLISHED
         listing.published_at = listing.updated_at
         listing.save()
 

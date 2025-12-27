@@ -2,7 +2,7 @@ from typing import Any
 
 from drf_spectacular.utils import OpenApiResponse, extend_schema
 from rest_framework.decorators import action
-from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.request import Request as DRFRequest
 from rest_framework.response import Response as DRFResponse
 from rest_framework.status import HTTP_200_OK
@@ -10,6 +10,7 @@ from rest_framework.viewsets import ViewSet
 from rest_framework_simplejwt.tokens import RefreshToken
 
 from apps.auths.models import User
+from apps.auths.permissions import IsUnauthenticatedUser
 from apps.auths.serializers import (
     AuthErrorsSerializer,
     HTTP405MethodNotAllowedSerializer,
@@ -74,7 +75,7 @@ class UserViewSet(ViewSet):
         detail=False,
         url_name="register",
         url_path="register",
-        permission_classes=(AllowAny,),
+        permission_classes=(IsUnauthenticatedUser,),
     )
     def register(
         self, request: DRFRequest, *args: tuple[Any, ...], **kwargs: dict[str, Any]
@@ -117,7 +118,7 @@ class UserViewSet(ViewSet):
         detail=False,
         url_name="login",
         url_path="login",
-        permission_classes=(AllowAny,),
+        permission_classes=(IsUnauthenticatedUser,),
     )
     def login(
         self, request: DRFRequest, *args: tuple[Any, ...], **kwargs: dict[str, Any]
