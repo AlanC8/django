@@ -36,7 +36,6 @@ class UserViewSet(ViewSet):
             ),
             405: HTTP405MethodNotAllowedSerializer,
         },
-        auth=[{"Bearer": []}],  # type: ignore
     )
     @action(
         methods=("GET",),
