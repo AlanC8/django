@@ -30,8 +30,7 @@ DJANGO_AND_THIRD_PARTY_APPS = [
 
     "rest_framework",
     "django_filters",
-    "drf_yasg",
-    
+    "drf_spectacular",
 ]
 
 PROJECT_APPS = [
@@ -43,14 +42,21 @@ PROJECT_APPS = [
 INSTALLED_APPS = DJANGO_AND_THIRD_PARTY_APPS + PROJECT_APPS
 
 REST_FRAMEWORK = {
+    **REST_FRAMEWORK,
+    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
     "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
     "PAGE_SIZE": 10,
-
     "DEFAULT_FILTER_BACKENDS": [
         "django_filters.rest_framework.DjangoFilterBackend",
         "rest_framework.filters.SearchFilter",
         "rest_framework.filters.OrderingFilter",
-    ]
+    ],
+}
+
+SPECTACULAR_SETTINGS = {
+    "TITLE": "Hata API",
+    "DESCRIPTION": "Public OpenAPI schema for the Hata platform.",
+    "VERSION": "v1",
 }
 
 # ----------------------------------------------------------------
@@ -113,5 +119,4 @@ LANGUAGE_CODE = "en-us"
 TIME_ZONE = "UTC"
 USE_I18N = True
 USE_TZ = True
-
 

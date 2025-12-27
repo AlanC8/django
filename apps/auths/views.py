@@ -1,7 +1,7 @@
 from typing import Any
 
-from drf_yasg import openapi
-from drf_yasg.utils import swagger_auto_schema
+from drf_spectacular.utils import OpenApiResponse, extend_schema, inline_serializer
+from rest_framework import serializers
 from rest_framework.decorators import action
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.request import Request as DRFRequest
@@ -23,31 +23,24 @@ class UserViewSet(ViewSet):
     ViewSet for handling CustomUser-related endpoints.
     """
 
-    @swagger_auto_schema(
-        operation_description="Fetch personal account details of the authenticated user.",
-        operation_summary="Get current user info",
+    @extend_schema(
         tags=["Auth"],
+        summary="Get current user info",
+        description="Fetch personal account details of the authenticated user.",
         responses={
-            200: openapi.Response(
-                description="User information retrieved successfully",
-                schema=openapi.Schema(
-                    type=openapi.TYPE_OBJECT,
-                    properties={
-                        "id": openapi.Schema(
-                            type=openapi.TYPE_INTEGER, description="User ID"
-                        ),
-                        "email": openapi.Schema(
-                            type=openapi.TYPE_STRING, description="User email"
-                        ),
-                    },
-                ),
+            200: inline_serializer(
+                name="UserInfoResponse",
+                fields={
+                    "id": serializers.IntegerField(),
+                    "email": serializers.EmailField(),
+                },
             ),
-            401: openapi.Response(
+            401: OpenApiResponse(
                 description="Authentication credentials were not provided"
             ),
             405: HTTP405MethodNotAllowedSerializer,
         },
-        security=[{"Bearer": []}],
+        auth=[{"Bearer": []}],
     )
     @action(
         methods=("GET",),
@@ -70,31 +63,20 @@ class UserViewSet(ViewSet):
             status=HTTP_200_OK,
         )
 
-    @swagger_auto_schema(
-        operation_description="Register a new user and return JWT tokens.",
-        operation_summary="Register new user",
+    @extend_schema(
         tags=["Auth"],
-        request_body=UserRegisterSerializer,
+        summary="Register new user",
+        description="Register a new user and return JWT tokens.",
+        request=UserRegisterSerializer,
         responses={
-            200: openapi.Response(
-                description="User registered successfully",
-                schema=openapi.Schema(
-                    type=openapi.TYPE_OBJECT,
-                    properties={
-                        "id": openapi.Schema(
-                            type=openapi.TYPE_INTEGER, description="User ID"
-                        ),
-                        "email": openapi.Schema(
-                            type=openapi.TYPE_STRING, description="User email"
-                        ),
-                        "access": openapi.Schema(
-                            type=openapi.TYPE_STRING, description="JWT access token"
-                        ),
-                        "refresh": openapi.Schema(
-                            type=openapi.TYPE_STRING, description="JWT refresh token"
-                        ),
-                    },
-                ),
+            200: inline_serializer(
+                name="UserRegisterResponse",
+                fields={
+                    "id": serializers.IntegerField(),
+                    "email": serializers.EmailField(),
+                    "access": serializers.CharField(),
+                    "refresh": serializers.CharField(),
+                },
             ),
             400: AuthErrorsSerializer,
             405: HTTP405MethodNotAllowedSerializer,

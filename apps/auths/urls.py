@@ -1,6 +1,6 @@
 from django.urls import include, path
-from drf_yasg import openapi
-from drf_yasg.utils import swagger_auto_schema
+from drf_spectacular.utils import OpenApiResponse, extend_schema, inline_serializer
+from rest_framework import serializers
 from rest_framework.routers import DefaultRouter
 from rest_framework_simplejwt.views import (
     TokenObtainPairView,
@@ -20,38 +20,26 @@ router.register(
 
 
 class DecoratedTokenObtainPairView(TokenObtainPairView):
-    @swagger_auto_schema(
-        operation_description="Authenticate user with email and password to obtain JWT tokens.",
-        operation_summary="Login",
+    @extend_schema(
         tags=["Auth"],
-        request_body=openapi.Schema(
-            type=openapi.TYPE_OBJECT,
-            required=["email", "password"],
-            properties={
-                "email": openapi.Schema(
-                    type=openapi.TYPE_STRING, description="User email"
-                ),
-                "password": openapi.Schema(
-                    type=openapi.TYPE_STRING, description="User password"
-                ),
+        summary="Login",
+        description="Authenticate user with email and password to obtain JWT tokens.",
+        request=inline_serializer(
+            name="TokenObtainPairRequest",
+            fields={
+                "email": serializers.EmailField(),
+                "password": serializers.CharField(),
             },
         ),
         responses={
-            200: openapi.Response(
-                description="Login successful",
-                schema=openapi.Schema(
-                    type=openapi.TYPE_OBJECT,
-                    properties={
-                        "access": openapi.Schema(
-                            type=openapi.TYPE_STRING, description="JWT access token"
-                        ),
-                        "refresh": openapi.Schema(
-                            type=openapi.TYPE_STRING, description="JWT refresh token"
-                        ),
-                    },
-                ),
+            200: inline_serializer(
+                name="TokenObtainPairResponse",
+                fields={
+                    "access": serializers.CharField(),
+                    "refresh": serializers.CharField(),
+                },
             ),
-            401: openapi.Response(description="Invalid credentials"),
+            401: OpenApiResponse(description="Invalid credentials"),
         },
     )
     def post(self, request, *args, **kwargs):
@@ -59,32 +47,24 @@ class DecoratedTokenObtainPairView(TokenObtainPairView):
 
 
 class DecoratedTokenRefreshView(TokenRefreshView):
-    @swagger_auto_schema(
-        operation_description="Refresh JWT access token using a valid refresh token.",
-        operation_summary="Refresh token",
+    @extend_schema(
         tags=["Auth"],
-        request_body=openapi.Schema(
-            type=openapi.TYPE_OBJECT,
-            required=["refresh"],
-            properties={
-                "refresh": openapi.Schema(
-                    type=openapi.TYPE_STRING, description="JWT refresh token"
-                ),
+        summary="Refresh token",
+        description="Refresh JWT access token using a valid refresh token.",
+        request=inline_serializer(
+            name="TokenRefreshRequest",
+            fields={
+                "refresh": serializers.CharField(),
             },
         ),
         responses={
-            200: openapi.Response(
-                description="Token refreshed successfully",
-                schema=openapi.Schema(
-                    type=openapi.TYPE_OBJECT,
-                    properties={
-                        "access": openapi.Schema(
-                            type=openapi.TYPE_STRING, description="New JWT access token"
-                        ),
-                    },
-                ),
+            200: inline_serializer(
+                name="TokenRefreshResponse",
+                fields={
+                    "access": serializers.CharField(),
+                },
             ),
-            401: openapi.Response(description="Invalid or expired refresh token"),
+            401: OpenApiResponse(description="Invalid or expired refresh token"),
         },
     )
     def post(self, request, *args, **kwargs):
@@ -92,22 +72,19 @@ class DecoratedTokenRefreshView(TokenRefreshView):
 
 
 class DecoratedTokenVerifyView(TokenVerifyView):
-    @swagger_auto_schema(
-        operation_description="Verify that a JWT token is valid.",
-        operation_summary="Verify token",
+    @extend_schema(
         tags=["Auth"],
-        request_body=openapi.Schema(
-            type=openapi.TYPE_OBJECT,
-            required=["token"],
-            properties={
-                "token": openapi.Schema(
-                    type=openapi.TYPE_STRING, description="JWT token to verify"
-                ),
+        summary="Verify token",
+        description="Verify that a JWT token is valid.",
+        request=inline_serializer(
+            name="TokenVerifyRequest",
+            fields={
+                "token": serializers.CharField(),
             },
         ),
         responses={
-            200: openapi.Response(description="Token is valid"),
-            401: openapi.Response(description="Token is invalid or expired"),
+            200: OpenApiResponse(description="Token is valid"),
+            401: OpenApiResponse(description="Token is invalid or expired"),
         },
     )
     def post(self, request, *args, **kwargs):
