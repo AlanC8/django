@@ -1,17 +1,74 @@
-from rest_framework import serializers
+# Python modules
+from typing import Any
+
+# Django REST Framework modules
+from rest_framework.serializers import ModelSerializer
+
+# Project modules
 from apps.locations.models import Microdistrict
-from apps.locations.serializers.districts import DistrictSerializer
+from apps.locations.serializers.districts import DistrictListSerializer
 
 
-class MicrodistrictSerializer(serializers.ModelSerializer):
-    district = DistrictSerializer(read_only=True)
-    district_id = serializers.PrimaryKeyRelatedField(
-        queryset=Microdistrict._meta.get_field("district").remote_field.model.objects.all(),
-        write_only=True,
-        source="district",
-    )
+class MicrodistrictBaseSerializer(ModelSerializer):
+    """
+    Base serializer for Microdistrict instances.
+    """
+    class Meta:
+        """
+        Customize the serializer's metadata.
+        """
+        model = Microdistrict
+        fields = "__all__"
+
+
+class MicrodistrictListSerializer(MicrodistrictBaseSerializer):
+    """
+    Serializer for listing Microdistrict instances.
+    """
+    # Вложенный сериализатор для отображения данных района
+    district = DistrictListSerializer(read_only=True)
 
     class Meta:
+        """
+        Customize the serializer's metadata.
+        """
         model = Microdistrict
-        fields = ["id", "name", "slug", "district", "district_id"]
-        read_only_fields = ["id", "slug"]
+        fields = (
+            "id",
+            "name",
+            "slug",
+            "district",
+        )
+
+
+class MicrodistrictCreateSerializer(MicrodistrictBaseSerializer):
+    """
+    Serializer for creating Microdistrict instances.
+    """
+    # district принимает ID
+    class Meta:
+        """
+        Customize the serializer's metadata.
+        """
+        model = Microdistrict
+        fields = (
+            "name",
+            "slug",
+            "district",
+        )
+
+
+class MicrodistrictUpdateSerializer(MicrodistrictBaseSerializer):
+    """
+    Serializer for updating Microdistrict instances.
+    """
+    class Meta:
+        """
+        Customize the serializer's metadata.
+        """
+        model = Microdistrict
+        fields = (
+            "name",
+            "slug",
+            "district",
+        )

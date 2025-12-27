@@ -1,80 +1,127 @@
-from django.db import models
+# Python modules
+from typing import Optional
 
+# Django modules
+from django.db.models import (
+    CharField,
+    SlugField,
+    ForeignKey,
+    CASCADE,
+    UniqueConstraint,
+)
+
+# Project modules
 from apps.abstracts.models import AbstractBaseModel
 
 
 class City(AbstractBaseModel):
     """
-    City (Almaty, Astana, Shymkent and etc.)
+    City database model (Almaty, Astana, etc.).
     """
 
     NAME_MAX_LEN = 100
     SLUG_MAX_LEN = 120
 
-    name = models.CharField(max_length=NAME_MAX_LEN, unique=True)
-    slug = models.SlugField(max_length=SLUG_MAX_LEN, unique=True)
+    name = CharField(
+        max_length=NAME_MAX_LEN,
+        unique=True,
+    )
+    slug = SlugField(
+        max_length=SLUG_MAX_LEN,
+        unique=True,
+    )
 
-    def __str__(self):
+    def __repr__(self) -> str:
+        return f"City(id={self.id}, name={self.name})"
+
+    def __str__(self) -> str:
         return self.name
 
 
 class District(AbstractBaseModel):
     """
-    District of the city (for example: Bostandyk, Almaly)
+    District of the city (Bostandyk, Almaly).
     """
 
     NAME_MAX_LEN = 120
     SLUG_MAX_LEN = 150
 
-    city = models.ForeignKey(City, on_delete=models.CASCADE, related_name="districts")
-    name = models.CharField(max_length=NAME_MAX_LEN)
-    slug = models.SlugField(max_length=SLUG_MAX_LEN)
+    city = ForeignKey(
+        to=City,
+        on_delete=CASCADE,
+        related_name="districts",
+    )
+    name = CharField(
+        max_length=NAME_MAX_LEN,
+    )
+    slug = SlugField(
+        max_length=SLUG_MAX_LEN,
+    )
 
     class Meta:
-        unique_together = ("city", "slug")
         ordering = ["name"]
+        unique_together = ("city", "slug")
 
-    def __str__(self):
+    def __repr__(self) -> str:
+        return f"District(id={self.id}, name={self.name}, city_id={self.city_id})"
+
+    def __str__(self) -> str:
         return f"{self.name} — {self.city.name}"
 
 
 class Microdistrict(AbstractBaseModel):
     """
-    Microdistrict inside the district (Samal-1, Samal-2, Orbit-3, Kokzheyek, Zhetysu 2 and etc.)
+    Microdistrict inside the district (Samal-1, Orbit-3).
     """
 
     NAME_MAX_LEN = 120
     SLUG_MAX_LEN = 150
 
-    district = models.ForeignKey(
-        District,
-        on_delete=models.CASCADE,
+    district = ForeignKey(
+        to=District,
+        on_delete=CASCADE,
         related_name="microdistricts",
     )
-    name = models.CharField(max_length=NAME_MAX_LEN)
-    slug = models.SlugField(max_length=SLUG_MAX_LEN)
+    name = CharField(
+        max_length=NAME_MAX_LEN,
+    )
+    slug = SlugField(
+        max_length=SLUG_MAX_LEN,
+    )
 
     class Meta:
-        unique_together = ("district", "slug")
         ordering = ["name"]
+        unique_together = ("district", "slug")
 
-    def __str__(self):
-        return f"{self.name} — {self.district.name} ({self.district.city.name})"
+    def __repr__(self) -> str:
+        return f"Microdistrict(id={self.id}, name={self.name}, district_id={self.district_id})"
+
+    def __str__(self) -> str:
+        return f"{self.name} — {self.district.name}"
 
 
 class Category(AbstractBaseModel):
     """
-    Category of the property.
+    Category of the property (Residential, Commercial, etc.).
     """
 
     NAME_MAX_LEN = 100
     SLUG_MAX_LEN = 120
 
-    name = models.CharField(max_length=NAME_MAX_LEN, unique=True)
-    slug = models.SlugField(max_length=SLUG_MAX_LEN, unique=True)
-
-    parent = models.ForeignKey(
-        "self", on_delete=models.CASCADE, related_name="children", null=True, blank=True
+    name = CharField(
+        max_length=NAME_MAX_LEN,
+        unique=True,
+    )
+    slug = SlugField(
+        max_length=SLUG_MAX_LEN,
+        unique=True,
+    )
+    parent = ForeignKey(
+        to="self",
+        on_delete=CASCADE,
+        related_name="children",
+        null=True,
+        blank=True,
     )
 
     class Meta:
@@ -82,5 +129,8 @@ class Category(AbstractBaseModel):
         verbose_name_plural = "Categories"
         ordering = ["name"]
 
-    def __str__(self):
+    def __repr__(self) -> str:
+        return f"Category(id={self.id}, name={self.name})"
+
+    def __str__(self) -> str:
         return self.name
