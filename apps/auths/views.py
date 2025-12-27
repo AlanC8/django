@@ -1,6 +1,7 @@
 from typing import Any
 
-from drf_spectacular.utils import OpenApiResponse, extend_schema, inline_serializer
+from drf_spectacular.utils import (OpenApiResponse, extend_schema,
+                                   inline_serializer)
 from rest_framework import serializers
 from rest_framework.decorators import action
 from rest_framework.permissions import AllowAny, IsAuthenticated
@@ -11,11 +12,9 @@ from rest_framework.viewsets import ViewSet
 from rest_framework_simplejwt.tokens import RefreshToken
 
 from apps.auths.models import User
-from apps.auths.serializers import (
-    AuthErrorsSerializer,
-    HTTP405MethodNotAllowedSerializer,
-    UserRegisterSerializer,
-)
+from apps.auths.serializers import (AuthErrorsSerializer,
+                                    HTTP405MethodNotAllowedSerializer,
+                                    UserRegisterSerializer)
 
 
 class UserViewSet(ViewSet):
@@ -40,7 +39,7 @@ class UserViewSet(ViewSet):
             ),
             405: HTTP405MethodNotAllowedSerializer,
         },
-        auth=[{"Bearer": []}],
+        auth=[{"Bearer": []}],  # type: ignore
     )
     @action(
         methods=("GET",),
@@ -98,8 +97,9 @@ class UserViewSet(ViewSet):
 
         user: User = User.objects.create_user(
             email=serializer.validated_data["email"],  # type: ignore
-            password=serializer.validated_data["password"],  # type: ignore
         )
+        user.set_password(serializer.validated_data["password"])  # type: ignore
+        user.save()
 
         refresh: RefreshToken = RefreshToken.for_user(user)
         access_token: str = str(refresh.access_token)
