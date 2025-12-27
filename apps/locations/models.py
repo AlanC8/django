@@ -7,8 +7,11 @@ class City(AbstractBaseModel):
     """
     City (Almaty, Astana, Shymkent and etc.)
     """
-    name = models.CharField(max_length=100, unique=True)
-    slug = models.SlugField(max_length=120, unique=True)
+    NAME_MAX_LEN = 100
+    SLUG_MAX_LEN = 120
+
+    name = models.CharField(max_length=NAME_MAX_LEN, unique=True)
+    slug = models.SlugField(max_length=SLUG_MAX_LEN, unique=True)
 
     def __str__(self):
         return self.name
@@ -18,13 +21,17 @@ class District(AbstractBaseModel):
     """
     District of the city (for example: Bostandyk, Almaly)
     """
+
+    NAME_MAX_LEN = 120
+    SLUG_MAX_LEN = 150
+
     city = models.ForeignKey(
         City,
         on_delete=models.CASCADE,
         related_name="districts"
     )
-    name = models.CharField(max_length=120)
-    slug = models.SlugField(max_length=150)
+    name = models.CharField(max_length=NAME_MAX_LEN)
+    slug = models.SlugField(max_length=SLUG_MAX_LEN)
 
     class Meta:
         unique_together = ("city", "slug")
@@ -38,13 +45,17 @@ class Microdistrict(AbstractBaseModel):
     """
     Microdistrict inside the district (Samal-1, Samal-2, Orbit-3, Kokzheyek, Zhetysu 2 and etc.)
     """
+
+    NAME_MAX_LEN = 120
+    SLUG_MAX_LEN = 150
+
     district = models.ForeignKey(
         District,
         on_delete=models.CASCADE,
         related_name="microdistricts",
     )
-    name = models.CharField(max_length=120)
-    slug = models.SlugField(max_length=150)
+    name = models.CharField(max_length=NAME_MAX_LEN)
+    slug = models.SlugField(max_length=SLUG_MAX_LEN)
 
     class Meta:
         unique_together = ("district", "slug")
@@ -66,8 +77,11 @@ class Category(AbstractBaseModel):
     и т.д.
     """
 
-    name = models.CharField(max_length=100, unique=True)
-    slug = models.SlugField(max_length=120, unique=True)
+    NAME_MAX_LEN = 100
+    SLUG_MAX_LEN = 120
+
+    name = models.CharField(max_length=NAME_MAX_LEN, unique=True)
+    slug = models.SlugField(max_length=SLUG_MAX_LEN, unique=True)
 
     # Пример: "Жилая недвижимость", "Коммерческая", "Земельные участки"
     parent = models.ForeignKey(
