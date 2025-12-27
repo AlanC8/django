@@ -7,6 +7,7 @@ class City(AbstractBaseModel):
     """
     City (Almaty, Astana, Shymkent and etc.)
     """
+
     NAME_MAX_LEN = 100
     SLUG_MAX_LEN = 120
 
@@ -25,11 +26,7 @@ class District(AbstractBaseModel):
     NAME_MAX_LEN = 120
     SLUG_MAX_LEN = 150
 
-    city = models.ForeignKey(
-        City,
-        on_delete=models.CASCADE,
-        related_name="districts"
-    )
+    city = models.ForeignKey(City, on_delete=models.CASCADE, related_name="districts")
     name = models.CharField(max_length=NAME_MAX_LEN)
     slug = models.SlugField(max_length=SLUG_MAX_LEN)
 
@@ -67,14 +64,7 @@ class Microdistrict(AbstractBaseModel):
 
 class Category(AbstractBaseModel):
     """
-    Категории типа недвижимости:
-    - квартира
-    - дом
-    - участок
-    - коммерция
-    - гараж
-    - новостройка
-    и т.д.
+    Category of the property.
     """
 
     NAME_MAX_LEN = 100
@@ -83,18 +73,13 @@ class Category(AbstractBaseModel):
     name = models.CharField(max_length=NAME_MAX_LEN, unique=True)
     slug = models.SlugField(max_length=SLUG_MAX_LEN, unique=True)
 
-    # Пример: "Жилая недвижимость", "Коммерческая", "Земельные участки"
     parent = models.ForeignKey(
-        "self",
-        on_delete=models.CASCADE,
-        related_name="children",
-        null=True,
-        blank=True
+        "self", on_delete=models.CASCADE, related_name="children", null=True, blank=True
     )
 
     class Meta:
-        verbose_name = "Категория"
-        verbose_name_plural = "Категории"
+        verbose_name = "Category"
+        verbose_name_plural = "Categories"
         ordering = ["name"]
 
     def __str__(self):
