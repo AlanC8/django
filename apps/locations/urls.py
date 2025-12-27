@@ -1,38 +1,44 @@
-from django.urls import path
+# Django modules
+from django.urls import include, path
 
-from .views.cities import CityViewSet
-from .views.districts import DistrictViewSet
-from .views.microdistricts import MicrodistrictViewSet
-from .views.categories import CategoryViewSet
+# Django Rest Framework modules
+from rest_framework.routers import DefaultRouter
+
+# Project modules
+from apps.locations.views.cities import CityViewSet
+from apps.locations.views.districts import DistrictViewSet
+from apps.locations.views.microdistricts import MicrodistrictViewSet
+from apps.locations.views.categories import CategoryViewSet
 
 
-city_list = CityViewSet.as_view({"get": "list", "post": "create"})
-city_detail = CityViewSet.as_view(
-    {"get": "retrieve", "patch": "partial_update", "delete": "destroy"})
+router: DefaultRouter = DefaultRouter(
+    trailing_slash=False
+)
 
-district_list = DistrictViewSet.as_view({"get": "list", "post": "create"})
-district_detail = DistrictViewSet.as_view(
-    {"get": "retrieve", "patch": "partial_update", "delete": "destroy"})
+router.register(
+    prefix="cities",
+    viewset=CityViewSet,
+    basename="cities",
+)
 
-microdistrict_list = MicrodistrictViewSet.as_view(
-    {"get": "list", "post": "create"})
-microdistrict_detail = MicrodistrictViewSet.as_view(
-    {"get": "retrieve", "patch": "partial_update", "delete": "destroy"})
+router.register(
+    prefix="districts",
+    viewset=DistrictViewSet,
+    basename="districts",
+)
 
-category_list = CategoryViewSet.as_view({"get": "list", "post": "create"})
-category_detail = CategoryViewSet.as_view(
-    {"get": "retrieve", "patch": "partial_update", "delete": "destroy"})
+router.register(
+    prefix="microdistricts",
+    viewset=MicrodistrictViewSet,
+    basename="microdistricts",
+)
+
+router.register(
+    prefix="categories",
+    viewset=CategoryViewSet,
+    basename="categories",
+)
 
 urlpatterns = [
-    path("cities/", city_list),
-    path("cities/<int:pk>/", city_detail),
-
-    path("districts/", district_list),
-    path("districts/<int:pk>/", district_detail),
-
-    path("microdistricts/", microdistrict_list),
-    path("microdistricts/<int:pk>/", microdistrict_detail),
-
-    path("categories/", category_list),
-    path("categories/<int:pk>/", category_detail),
+    path("", include(router.urls)),
 ]
