@@ -1,64 +1,37 @@
-from django.urls import path
+# Django modules
+from django.urls import include, path
 
-from .views.listings import ListingViewSet
-from .views.properties import PropertyViewSet
-from .views.photos import PhotoViewSet
+# Django Rest Framework modules
+from rest_framework.routers import DefaultRouter
 
+# Project modules
+from apps.listings.views.listings import ListingViewSet
+from apps.listings.views.properties import PropertyViewSet
+from apps.listings.views.photos import PhotoViewSet
 
-listing_list = ListingViewSet.as_view({
-    "get": "list",
-    "post": "create",
-})
+router: DefaultRouter = DefaultRouter(
+    trailing_slash=False
+)
 
-listing_detail = ListingViewSet.as_view({
-    "get": "retrieve",
-    "patch": "partial_update",
-    "delete": "destroy",
-})
+router.register(
+    prefix="listings",
+    viewset=ListingViewSet,
+    basename="listings",
+)
 
-listing_my = ListingViewSet.as_view({
-    "get": "my_listings",
-})
+router.register(
+    prefix="properties",
+    viewset=PropertyViewSet,
+    basename="properties",
+)
 
-listing_publish = ListingViewSet.as_view({
-    "post": "publish",
-})
-
-
-property_list = PropertyViewSet.as_view({
-    "get": "list",
-    "post": "create",
-})
-
-property_detail = PropertyViewSet.as_view({
-    "get": "retrieve",
-    "patch": "partial_update",
-    "delete": "destroy",
-})
-
-
-photo_list = PhotoViewSet.as_view({
-    "get": "list",
-    "post": "create",
-})
-
-photo_detail = PhotoViewSet.as_view({
-    "delete": "destroy",
-})
-
+router.register(
+    prefix="photos",
+    viewset=PhotoViewSet,
+    basename="photos",
+)
 
 urlpatterns = [
-    # Listings
-    path("listings/", listing_list),
-    path("listings/<int:pk>/", listing_detail),
-    path("listings/my/", listing_my),
-    path("listings/<int:pk>/publish/", listing_publish),
-
-    # Properties
-    path("properties/", property_list),
-    path("properties/<int:pk>/", property_detail),
-
-    # Photos
-    path("photos/", photo_list),
-    path("photos/<int:pk>/", photo_detail),
+    # Преподаватель использовал префикс v1, можно добавить сюда или в главном urls.py
+    path("", include(router.urls)), 
 ]

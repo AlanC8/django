@@ -1,6 +1,23 @@
-from django.conf import settings
-from django.db import models
+# Python modules
+from typing import Dict, Union
 
+# Django modules
+from django.conf import settings
+from django.db.models import (
+    CASCADE,
+    BooleanField,
+    CharField,
+    DateTimeField,
+    DecimalField,
+    ForeignKey,
+    ImageField,
+    PositiveIntegerField,
+    PositiveSmallIntegerField,
+    TextField,
+    TextChoices,
+)
+
+# Project modules
 from apps.abstracts.models import AbstractBaseModel
 
 
@@ -10,72 +27,87 @@ class Property(AbstractBaseModel):
     Can have multiple listings (Listing).
     """
 
-    class PropertyType(models.TextChoices):
+    TITLE_MAX_LEN = 100
+    PROPERTY_TYPE_MAX_LEN = 20
+    ADDRESS_MAX_LEN = 100
+    TOTAL_MAX_DIGITS = 7
+    TOTAL_DECIMAL_PLACES = 2
+    MAP_MAX_DIGITS = 9
+    MAX_DECIMAL_PLACES = 6
+
+    class PropertyType(TextChoices):
         APARTMENT = "apartment", "Apartment"
         HOUSE = "house", "House"
         COMMERCIAL = "commercial", "Commercial"
         LAND = "land", "Land"
 
-    title = models.CharField(
-        max_length=255,
+    title = CharField(
+        max_length=TITLE_MAX_LEN,
         help_text="Short name of the property, for example: '2-bedroom apartment, Samal'",
     )
-    property_type = models.CharField(
-        max_length=20,
+    property_type = CharField(
+        max_length=PROPERTY_TYPE_MAX_LEN,
         choices=PropertyType.choices,
         default=PropertyType.APARTMENT,
     )
-    city = models.CharField(max_length=100)
-    address = models.CharField(max_length=255)
-
-    rooms = models.PositiveSmallIntegerField(
+    city = CharField(
+        max_length=TITLE_MAX_LEN,
+    )
+    address = CharField(
+        max_length=ADDRESS_MAX_LEN,
+    )
+    rooms = PositiveSmallIntegerField(
         help_text="Number of rooms",
     )
-    total_area = models.DecimalField(
-        max_digits=7,
-        decimal_places=2,
+    total_area = DecimalField(
+        max_digits=TOTAL_MAX_DIGITS,
+        decimal_places=TOTAL_DECIMAL_PLACES,
         help_text="Total area, m²",
     )
-    living_area = models.DecimalField(
-        max_digits=7,
-        decimal_places=2,
+    living_area = DecimalField(
+        max_digits=TOTAL_MAX_DIGITS,
+        decimal_places=TOTAL_DECIMAL_PLACES,
         null=True,
         blank=True,
         help_text="Living area, m²",
     )
-
-    floor = models.PositiveSmallIntegerField(
+    floor = PositiveSmallIntegerField(
         null=True,
         blank=True,
         help_text="Floor",
     )
-    total_floors = models.PositiveSmallIntegerField(
+    total_floors = PositiveSmallIntegerField(
         null=True,
         blank=True,
         help_text="Total floors in the house",
     )
-    year_built = models.PositiveSmallIntegerField(
+    year_built = PositiveSmallIntegerField(
         null=True,
         blank=True,
         help_text="Year of construction",
     )
-
-    latitude = models.DecimalField(
-        max_digits=9,
-        decimal_places=6,
+    latitude = DecimalField(
+        max_digits=MAP_MAX_DIGITS,
+        decimal_places=MAX_DECIMAL_PLACES,
         null=True,
         blank=True,
     )
-    longitude = models.DecimalField(
-        max_digits=9,
-        decimal_places=6,
+    longitude = DecimalField(
+        max_digits=MAP_MAX_DIGITS,
+        decimal_places=MAX_DECIMAL_PLACES,
         null=True,
         blank=True,
     )
+    is_new_building = BooleanField(
+        default=False,
+    )
 
-    is_new_building = models.BooleanField(default=False)
+    def __repr__(self) -> str:
+        """Returns the official string representation of the object."""
+        return f"Property(id={self.id}, title={self.title}, city={self.city})"
 
     def __str__(self) -> str:
+        """Returns the string representation of the object."""
         return f"{self.title} ({self.city})"
 
 
@@ -85,49 +117,68 @@ class Listing(AbstractBaseModel):
     Linked to Property and user.
     """
 
-    class Status(models.TextChoices):
+    TITLE_MAX_LEN = 100
+    PRICE_MAX_DIGITS = 12
+    PRICE_DECIMAL_PLACES = 2
+    CURRENCY_MAX_LEN = 3
+    STATUS_MAX_LEN = 20
+
+    class Status(TextChoices):
         DRAFT = "draft", "Draft"
         PUBLISHED = "published", "Published"
         ARCHIVED = "archived", "Archived"
 
-    property = models.ForeignKey(
-        Property,
-        on_delete=models.CASCADE,
+    property = ForeignKey(
+        to=Property,
+        on_delete=CASCADE,
         related_name="listings",
     )
-    owner = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
-        on_delete=models.CASCADE,
+    owner = ForeignKey(
+        to=settings.AUTH_USER_MODEL,
+        on_delete=CASCADE,
         related_name="listings",
     )
-
-    title = models.CharField(max_length=255)
-    description = models.TextField(blank=True)
-
-    price = models.DecimalField(
-        max_digits=12,
-        decimal_places=2,
+    title = CharField(
+        max_length=TITLE_MAX_LEN,
     )
-    currency = models.CharField(
-        max_length=3,
-        default="KZT",  # можешь поменять на choices
+    description = TextField(
+        blank=True,
     )
-
-    status = models.CharField(
-        max_length=20,
+    price = DecimalField(
+        max_digits=PRICE_MAX_DIGITS,
+        decimal_places=PRICE_DECIMAL_PLACES,
+    )
+    currency = CharField(
+        max_length=CURRENCY_MAX_LEN,
+        default="KZT",  
+    )
+    status = CharField(
+        max_length=STATUS_MAX_LEN,
         choices=Status.choices,
         default=Status.DRAFT,
     )
-    is_top = models.BooleanField(
+    is_top = BooleanField(
         default=False,
         help_text="Top/raised listing",
     )
-    published_at = models.DateTimeField(
+    published_at = DateTimeField(
         null=True,
         blank=True,
     )
 
+    def get_status_display(self) -> str:
+        """
+        Get the human-readable status label.
+        Manual implementation since we use dict for choices (optional but safer).
+        """
+        return self.Status(self.status).label if self.status in self.Status.values else str(self.status)
+
+    def __repr__(self) -> str:
+        """Returns the official string representation of the object."""
+        return f"Listing(id={self.id}, title={self.title}, status={self.status})"
+
     def __str__(self) -> str:
+        """Returns the string representation of the object."""
         return f"{self.title} — {self.price} {self.currency}"
 
 
@@ -144,22 +195,29 @@ class Photo(AbstractBaseModel):
     Photo, linked to the listing.
     """
 
-    listing = models.ForeignKey(
-        Listing,
-        on_delete=models.CASCADE,
+    ORDER_DEFAULT = 0
+
+    listing = ForeignKey(
+        to=Listing,
+        on_delete=CASCADE,
         related_name="photos",
     )
-    image = models.ImageField(
+    image = ImageField(
         upload_to=listing_photo_upload_to,
     )
-    is_main = models.BooleanField(
+    is_main = BooleanField(
         default=False,
         help_text="Main photo",
     )
-    order = models.PositiveIntegerField(
-        default=0,
+    order = PositiveIntegerField(
+        default=ORDER_DEFAULT,
         help_text="Order of sorting",
     )
 
+    def __repr__(self) -> str:
+        """Returns the official string representation of the object."""
+        return f"Photo(id={self.id}, listing_id={self.listing_id})"
+
     def __str__(self) -> str:
+        """Returns the string representation of the object."""
         return f"Photo #{self.pk} for listing {self.listing_id}"
