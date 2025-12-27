@@ -131,3 +131,24 @@ class UserRegisterSerializer(Serializer):
             )
 
         return email
+
+
+class UserSuccessAuthSerializer(Serializer):
+    """
+    Serializer for successful authentication response.
+    """
+
+    id = CharField()
+    email = EmailField()
+    access = CharField()
+    refresh = CharField()
+
+    class Meta:
+        """Customization of the Serializer metadata."""
+
+        fields = (
+            "id",
+            "email",
+            "access",
+            "refresh",
+        )
